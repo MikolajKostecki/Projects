@@ -1,0 +1,4 @@
+SELECT TAB_All.Num, TAB_All.RDok, Sum(TAB_All.Netto) AS SumaNetto, Count(TAB_All.Ilość) AS Ilość
+FROM TAB_All
+WHERE ((([TAB_All].[Date])>=#4/1/2022# And ([TAB_All].[Date])<=#6/30/2022#))
+GROUP BY TAB_All.Num, TAB_All.RDok;
