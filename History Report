@@ -1,4 +1,4 @@
-Sub zapisz()
+Sub save()
 
 Dim data As Date
 Dim Dane(1 To 22) As Double
