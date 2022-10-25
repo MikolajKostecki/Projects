@@ -37,7 +37,7 @@ On Error Resume Next
       With mail
         .To = Sheets("lista_mail").Cells(3, 2)
         .CC = Sheets("lista_mail").Cells(4, 2)
-        .Subject = "Raport koszy - " & Format(data, "dd.mm.yyyy")
+        .Subject = "Report - " & Format(data, "dd.mm.yyyy")
         .htmlBody = RangetoHTML(rng) & ""
         .display
       End With
