@@ -11,14 +11,13 @@ Dim ROW_CTR_RNG As Range
 Set ROW_CTR_RNG = ko.Range("L1")
 
     KO_TAB.RemoveDuplicates Columns:=7, Header:=xlYes
-    
-'Ustawianie formatowania "tekst jako kolumny"
-ko.Range("KOLA[NR PACZKI]").TextToColumns Destination:=Range("G2"), DataType:=xlDelimited, _
+
+ko.Range("KOLA[NR]").TextToColumns Destination:=Range("G2"), DataType:=xlDelimited, _
         TextQualifier:=xlDoubleQuote, ConsecutiveDelimiter:=False, Tab:=True, _
         Semicolon:=False, Comma:=False, Space:=False, Other:=False, FieldInfo _
         :=Array(1, 1), TrailingMinusNumbers:=True
         
-ko.Range("KOLA[ID ODBIORCY]").TextToColumns Destination:=Range("B2"), DataType:=xlDelimited, _
+ko.Range("KOLA[ID]").TextToColumns Destination:=Range("B2"), DataType:=xlDelimited, _
         TextQualifier:=xlDoubleQuote, ConsecutiveDelimiter:=False, Tab:=True, _
         Semicolon:=False, Comma:=False, Space:=False, Other:=False, FieldInfo _
         :=Array(1, 1), TrailingMinusNumbers:=True
@@ -28,29 +27,29 @@ ko.Range("Kola[NR PACZKI]").NumberFormat = "General"
 ko.Range("Kola[NR PACZKI]").NumberFormat = "0"
 
 ko.ListObjects("kola").Range.AutoFilter Field:=3, Criteria1:= _
-        "=VGP*", Operator:=xlAnd
+        "=Company*", Operator:=xlAnd
         
 ROW_CTR = ROW_CTR_RNG.Value
 If ROW_CTR = 0 Then GoTo Next_4
 
-ko.Range("kola[NAZWA ODBIORCY]").EntireRow.Delete
+ko.Range("kola[NAME]").EntireRow.Delete
 
 Next_4:
   ko.ListObjects("kola").Range.AutoFilter Field:=3
         
-ko.Range("Kola[DATA UTWORZENIA]:Kola[NAZWA ODBIORCY]").Copy
+ko.Range("Kola[DATE]:Kola[NAME]").Copy
 ex.Activate
 Dim np As Double
   np = WorksheetFunction.CountA(Range("E:E")) + 1
 ex.Cells(np, 1).Select
  Selection.PasteSpecial Paste:=xlPasteValues, Transpose:=False
 
-ko.Range("Kola[NR PACZKI]").Copy
+ko.Range("Kola[NR]").Copy
 ex.Activate
 ex.Cells(np, 4).Select
  Selection.PasteSpecial Paste:=xlPasteValues, Transpose:=False
 
-ko.Range("Kola[Typ dostawy]").Copy
+ko.Range("Kola[Type]").Copy
 ex.Activate
 ex.Cells(np, 5).Select
   Selection.PasteSpecial Paste:=xlPasteValues, Transpose:=False
