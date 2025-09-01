@@ -1,1 +1,39 @@
-
+WITH
+-- Box, delivery table
+VL AS (
+-- Processed box table
+    SELECT Ve.Vpobjkey [Delivery]
+          ,Ve.Vhilm [Box type]
+          ,Ve.Exidv [Box number]
+        FROM [database].[xxxxx].[Table] Ve
+        WHERE Vpobjkey LIKE '3%' AND Erdat >= DATEADD(D,-7,GETDATE())
+    UNION
+-- In process box table
+    SELECT Lt.Vbeln [Delivery]
+          ,Lt.Vhilm [Box type]
+          ,Lt.Exidv [Box number]
+        FROM [database].[xxxxx].[Table2] Lt
+),
+--Real weight of delivery table
+Zc AS (SELECT Vbeln
+             ,SUM(BRGEW_SOLL) [Weight]
+        FROM [database].[xxxxx].[Table3]
+        WHERE Ta_qdatu >= DATEADD(D,-7,GETDATE()) OR Ta_qdatu IS NULL
+        GROUP BY Vbeln
+),
+-- Courier, delivery table
+Vt AS (SELECT Vbeln, Routecode
+FROM [database].[xxxxx].[Table4]
+WHERE ErdatLikp >= DATEADD(D,-7,GETDATE()) AND Vbeln LIKE '3%'
+)
+--Main joined table
+SELECT DISTINCT VL.Delivery
+               ,VL.[Box type]
+               ,VL.[Box number]
+               ,Vt.Routecode [Courier]
+               ,(Zc.Weight/COUNT('x') OVER (PARTITION BY VL.Delivery)) [Weight]
+FROM VL
+LEFT JOIN Zc
+ON VL.Delivery = Zc.Vbeln
+LEFT JOIN Vt
+ON VL.Delivery = Vt.Vbeln
