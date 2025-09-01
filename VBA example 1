@@ -1,0 +1,130 @@
+Sub Check_shortages()
+
+Application.ScreenUpdating = False
+
+'Declarations and defining variables
+Dim Bp, Bi, Br, Bb, Bo, Bs, Bt, Dat As Worksheet
+Dim Rng_P, Rng_I, Rng_R, Rng_B, Rng_O, Rng_S, Rng_T  As Variant
+Dim j, i As Integer
+Set Bp = Sheets("BRAKI_PICK")
+Set Bi = Sheets("BRAKI_IN")
+Set Br = Sheets("BRAKI_RET")
+Set Bb = Sheets("BRAKI_B2B")
+Set Bo = Sheets("BRAKI_OSM")
+Set Bs = Sheets("BRAKI_STOCK")
+Set Bt = Sheets("BRAKI_OUT")
+Set Dat = Sheets("Data")
+Lg = Range("LQUA")
+
+For j = 1 To UBound(Lg, 1) 'Loop looking for the type of shortages
+
+If Lg(j, 6) = "BRAKI_PICK" Then 'If function looking for 1st type - the same functions for other types in next groups od rows
+    kp = Bp.Range("B1").CurrentRegion.Rows.Count 'Counting filled rows, used when the new shortage appears
+    Rng_P = Bp.Range("B2", "D" & kp) 'Defining the range of data in a table
+    Fp = 0 'variable for next loop condition
+    For i = 1 To UBound(Rng_P, 1) 'Inner loop looking for existing shortages based on the material, date and quantity in a table
+    If Rng_P(i, 1) = Dat.Range("B" & j + 1) And Rng_P(i, 2) = Dat.Range("C" & j + 1) And Rng_P(i, 3) = Dat.Range("D" & j + 1) Then
+        Fp = 1
+    End If
+    Next i
+        If Fp <> 1 Then 'condition based on previous value, if shortage doesn't exist, copy and paste it in a table
+        Dat.Range("A" & j + 1, "D" & j + 1).Copy
+        Bp.Range("A" & kp + 1).PasteSpecial Paste:=xlValues
+        End If
+End If
+'Next condition for another type of shortage in the next worksheet
+If Lg(j, 6) = "BRAKI_IN" Then
+    ki = Bi.Range("B1").CurrentRegion.Rows.Count
+    Rng_I = Bi.Range("B2", "D" & ki)
+    Fi = 0
+    For i = 1 To UBound(Rng_I, 1)
+    If Rng_I(i, 1) = Dat.Range("B" & j + 1) And Rng_I(i, 2) = Dat.Range("C" & j + 1) And Rng_I(i, 3) = Dat.Range("D" & j + 1) Then
+        Fi = 1
+    End If
+    Next i
+        If Fi <> 1 Then
+        Dat.Range("A" & j + 1, "D" & j + 1).Copy
+        Bi.Range("A" & ki + 1).PasteSpecial Paste:=xlValues
+        End If
+End If
+'Next condition for another type of shortage in the next worksheet
+If Lg(j, 6) = "BRAKI_RET" Then
+    kr = Br.Range("B1").CurrentRegion.Rows.Count
+    Rng_r = Br.Range("B2", "D" & kr)
+    Fr = 0
+    For i = 1 To UBound(Rng_r, 1)
+    If Rng_r(i, 1) = Dat.Range("B" & j + 1) And Rng_r(i, 2) = Dat.Range("C" & j + 1) And Rng_r(i, 3) = Dat.Range("D" & j + 1) Then
+        Fr = 1
+    End If
+    Next i
+        If Fr <> 1 Then
+        Dat.Range("A" & j + 1, "D" & j + 1).Copy
+        Br.Range("A" & kr + 1).PasteSpecial Paste:=xlValues
+        End If
+End If
+'Next condition for another type of shortage in the next worksheet
+If Lg(j, 6) = "BRAKI_B2B" Then
+    kb = Bb.Range("B1").CurrentRegion.Rows.Count
+    Rng_B = Bb.Range("B2", "D" & kb)
+    Fb = 0
+    For i = 1 To UBound(Rng_B, 1)
+    If Rng_B(i, 1) = Dat.Range("B" & j + 1) And Rng_B(i, 2) = Dat.Range("C" & j + 1) And Rng_B(i, 3) = Dat.Range("D" & j + 1) Then
+        Fb = 1
+    End If
+    Next i
+        If Fb <> 1 Then
+        Dat.Range("A" & j + 1, "D" & j + 1).Copy
+        Bb.Range("A" & kb + 1).PasteSpecial Paste:=xlValues
+        End If
+End If
+'Next condition for another type of shortage in the next worksheet
+If Lg(j, 6) = "BRAKI_OSM" Then
+    ko = Bo.Range("B1").CurrentRegion.Rows.Count
+    Rng_O = Bo.Range("B2", "D" & ko)
+    Fo = 0
+    For i = 1 To UBound(Rng_O, 1)
+    If Rng_O(i, 1) = Dat.Range("B" & j + 1) And Rng_O(i, 2) = Dat.Range("C" & j + 1) And Rng_O(i, 3) = Dat.Range("D" & j + 1) Then
+        Fo = 1
+    End If
+    Next i
+        If Fo <> 1 Then
+        Dat.Range("A" & j + 1, "D" & j + 1).Copy
+        Bo.Range("A" & ko + 1).PasteSpecial Paste:=xlValues
+        End If
+End If
+'Next condition for another type of shortage in the next worksheet
+If Lg(j, 6) = "BRAKI_STOCK" Then
+    ks = Bs.Range("B1").CurrentRegion.Rows.Count
+    Rng_S = Bs.Range("B2", "D" & ks)
+    Fs = 0
+    For i = 1 To UBound(Rng_S, 1)
+    If Rng_S(i, 1) = Dat.Range("B" & j + 1) And Rng_S(i, 2) = Dat.Range("C" & j + 1) And Rng_S(i, 3) = Dat.Range("D" & j + 1) Then
+        Fs = 1
+    End If
+    Next i
+        If Fs <> 1 Then
+        Dat.Range("A" & j + 1, "D" & j + 1).Copy
+        Bs.Range("A" & ks + 1).PasteSpecial Paste:=xlValues
+        End If
+End If
+'Next condition for another type of shortage in the next worksheet
+If Lg(j, 6) = "BRAKI_OUT" Then
+    kt = Bt.Range("B1").CurrentRegion.Rows.Count
+    Rng_T = Bt.Range("B2", "D" & kt)
+    Ft = 0
+    For i = 1 To UBound(Rng_T, 1)
+    If Rng_T(i, 1) = Dat.Range("B" & j + 1) And Rng_T(i, 2) = Dat.Range("C" & j + 1) And Rng_T(i, 3) = Dat.Range("D" & j + 1) Then
+        Ft = 1
+    End If
+    Next i
+        If Ft <> 1 Then
+        Dat.Range("A" & j + 1, "D" & j + 1).Copy
+        Bt.Range("A" & kt + 1).PasteSpecial Paste:=xlValues
+        End If
+End If
+
+Next j
+
+Application.ScreenUpdating = True
+
+End Sub
