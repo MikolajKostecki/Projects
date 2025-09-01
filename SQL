@@ -1,0 +1,91 @@
+WITH
+--Trainer company table
+trainercards AS(
+SELECT DISTINCT
+      [Numer SAP] [SAPtrainer]
+      ,CASE 
+      WHEN Agencja is null or Agencja = '' then 'CompanyNameX'
+      Else Agencja
+      End [Trainer Company]
+  FROM [database].[xxxxx].[Table]
+),
+--Trainee company table
+traineecards AS(
+SELECT DISTINCT
+      [Numer SAP] [SAPtrainee]
+      ,CASE 
+      WHEN Agencja is null or Agencja = '' then 'CompanyNameX'
+      Else Agencja
+      End [Trainee Company]
+  FROM [database].[xxxxx].[Table]
+  WHERE Karta is not null
+),
+--OH Employee table
+ohcards AS(
+SELECT DISTINCT [Nr SAP]
+      ,[Agencja]
+      ,[Lokalizacja]
+      ,CASE 
+      When [PGORA] in ('Type1', 'Type2', 'Type3', 'Type4') then 'OH'
+      Else NULL
+      End [OH]
+      ,[JORG]
+      ,[Numery Kart]
+      ,[Typ Pracownika]
+      ,[Obszar]
+  FROM [database].[xxxxx].[Table2]
+  WHERE [Lokalizacja] = 'LocationX'
+),
+--Process login table
+log AS(
+    SELECT 
+      MAX([Data]) [Date]
+      ,[Numer SAP]
+      ,[Opis Sektora]
+  FROM [database].[xxxxx].[Table3]
+  WHERE
+  [Nazwa Klienta] = 'ClientNameX' AND 
+  [Data] >= DATEADD(day, -60, GETDATE()) AND
+  [Karta] IS NOT NULL
+  GROUP BY
+       [Numer SAP]
+      ,[Opis Sektora]
+)
+--Main training table + joined tables
+SELECT 
+      SUBSTRING(t.[TrainingTypeName],CHARINDEX(' ',t.[TrainingTypeName])+1,LEN(t.[TrainingTypeName])) AS [Process]
+      ,t.[TrainingReasonName] AS [Training type]
+      ,t.[Trainer] AS [Trainer Card]
+      ,t.[TrainerName] AS [Trainer Name]
+      ,t.[TrainerSAP] AS [Trainer SAP]
+      ,[Trainer Company]
+      ,t.[Trainee] AS [Trainee Card]
+      ,t.[TraineeName] AS [Trainee Name]
+      ,t.[TraineeSAP] AS [Trainee SAP]
+      ,[Trainee Company]
+      ,t.[TrainingDate] AS [Training Start Date]
+      ,t.[TrainingEndDate] AS [Training End Date]
+      ,t.[Finished] AS [Training status]
+      ,t.[Comment]
+      ,t.[Grade]
+      ,[OH] as [OH Emploee]
+      ,t.[TestPassed] [Test Passed]
+      ,CASE
+      WHEN t.[Tested] = '0' OR t.[Tested] IS NULL THEN 'NO'
+      ELSE 'TAK' END AS [Test]
+      ,CASE WHEN t.[TrainingTypeName] IS NOT NULL THEN 'X'
+      ELSE '0'
+      END [Training]
+      ,l.[Date] AS [Last Login Date]
+      ,DATEDIFF(day, t.[TrainingDate], t.[TrainingEndDate])+1 AS [Training Days]
+      ,DATEDIFF(day, t.[TrainingDate], GETDATE())+1 AS [Days Form the Start of the Training]
+      ,DATEDIFF(day, t.[TrainingEndDate], GETDATE()) AS [Days Form the End of the Training]
+      ,DATEDIFF(day, l.[Date], GETDATE()) AS [Days From Last Activity on the process]
+  FROM [database].[xxxxx].[Table4] t
+--Joining other tables
+LEFT JOIN [ohcards] AS oh ON t.[TraineeSAP] = oh.[Nr SAP]
+INNER JOIN [traineecards] AS te ON t.[TraineeSAP] = e.[SAPtrainee] --Exclusion of emploees no longer working
+LEFT JOIN [trainercards] AS tr ON t.[TrainerSAP] = tr.[SAPtrainer]
+LEFT JOIN [log] AS l ON t.[TraineeSAP] = l.[Numer SAP] AND t.[TrainingDate] <= l.[Date] AND SUBSTRING(t.[TrainingTypeName],CHARINDEX(' ',t.[TrainingTypeName])+1,LEN(t.[TrainingTypeName])) = l.[Opis Sektora]
+
+ORDER BY [Training End Date] ASC
