@@ -1,0 +1,75 @@
+Sub check_pallet() 'box to pallet audit
+
+Dim Skar As Worksheet
+Dim Apal As Worksheet
+
+Set Skar = Sheets("Boxcheck")
+Set Apal = Sheets("PalletAudit")
+
+pal = InputBox("Zeskanuj miejsce paletowe")
+
+If Len(pal) <> 10 Then GoTo Msg Else
+
+On Error GoTo Msg1
+
+zx = Range("Tabela_LQUA[Miejsce składowania]")
+c = WorksheetFunction.Match(pal, zx, 0)
+n = Range("N1").CurrentRegion.Rows.Count + 1
+Cells(n, 14) = pal
+Skar.ListObjects("Tabela_LQUA").Range.AutoFilter Field:=1, Criteria1:=pal
+Skar.ListObjects("Tabela_LQUA").DataBodyRange.Copy
+Apal.Range("A2").PasteSpecial xlPasteValues
+Apal.Select
+On Error GoTo 0
+
+Rn = Range("Pallet")
+rj = Range("Pallet[Jednostka składow.]")
+
+For i = 1 To UBound(Rn, 1)
+  kar = InputBox("Zeskanuj numery kartonów")
+    If kar = Empty Then GoTo Msg3
+  On Error GoTo Msg2
+  k = WorksheetFunction.Match(kar, rj, 0)
+  Cells(k + 1, 2).Interior.Color = RGB(255, 0, 0)
+  On Error GoTo 0
+  ne:
+Next i
+
+Apal.Select
+For Each cell In rj
+  If Range("Pallet[Jednostka składow.]").Interior.Color = RGB(255, 0, 0) Then
+    Col = Col + 1
+  End If
+Next cell
+
+If Col = UBound(Rn, 1) Then
+  MsgOK.Show 'MsgBox ("Audyt zakończony pomyślnie")
+  Apal.ListObjects("Pallet").DataBodyRange.clear
+  Apal.ListObjects("Pallet").Resize Range("A1:I2")
+  Skar.Select
+  Skar.Range("A1").Select
+  Skar.ShowAllData
+  Apal.Select
+Else
+  MsgNotOk.Show 'MsgBox ("Audyt zakończony niepowodzeniem" & vbCrLf & "Wyjaśnij rozbiezności")
+  Skar.Select
+  Skar.Range("A1").Select
+  Skar.ShowAllData
+  Apal.Select
+End If
+Exit Sub
+
+Msg: Msg.Show 'MsgBox ("Zeskanuj poprawnie miejsce paletowe")
+Exit Sub
+
+Msg3: Msg3.Show 'MsgBox("Za mało kartonów na palecie" & vbCrLf & "Zgłoś się do lidera")
+Exit Sub
+
+Msg2:
+Application.Speech.Speak ("Przerwij audyt, sprawdź błąd")
+Msg2.Show
+i = i - 1
+Resume ne 'MsgBox ("ZŁY NUMER KATONU!" & vbCrLf & "Przynieś karton do lidera")
+
+Msg1: Msg1.Show 'MsgBox ("Sprawdź dane")
+End Sub
