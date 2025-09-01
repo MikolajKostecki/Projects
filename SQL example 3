@@ -1,0 +1,35 @@
+WITH
+-- SKU quantity table per date
+L as (SELECT Scandate, SUM([SKU Qty]) [SKU Qty]
+      FROM (SELECT COUNT(DISTINCT Zh.[Matnr]) [SKU Qty]
+                  ,[Exidv]
+                  ,[Scandate]
+            FROM [database].[xxxxx].[Table] Zh --SKU in a box inbound table
+              LEFT JOIN [database].[xxxxx].[Table2] M -- Material data table
+              ON M.Matnr = Zh.Matnr
+            WHERE Lotto <> 'X' AND Done = 'X' AND Scandate >= DATEADD(D, -32, GETDATE())
+            GROUP BY Exidv, [Scandate]
+            HAVING COUNT(DISTINCT Zh.[Matnr]) >1 AND SUM(CASE WHEN Matkl LIKE 'GOH%' THEN 1 ELSE 0 END) <1 --Multi SKU boxes with no GOH* inside
+            )a
+      GROUP BY Scandate
+),
+-- Box quantity table per date
+M as (SELECT Scandate, SUM([Box Qty]) [Box Qty]
+      FROM (SELECT COUNT(DISTINCT Zh.[Exidv]) [Box Qty]
+                  ,[Exidv]
+                  ,[Scandate]
+            FROM [database].[xxxxx].[Table] Zh --SKU in a box inbound table
+              LEFT JOIN [database].[xxxxx].[Table2] M -- Material data table
+              ON M.Matnr = Zh.Matnr
+            WHERE Lotto <> 'X' AND Done = 'X' AND Scandate >= DATEADD(D, -32, GETDATE())
+            GROUP BY Exidv, [Scandate]
+            HAVING COUNT(DISTINCT Zh.[Matnr]) >1 --All multi SKU boxes
+            )b
+      GROUP BY Scandate
+)
+--Output joined table - measure: Quantity of no GOH SKUs in ALL multi SKU boxes
+SELECT M.Scandate, L.[SKU Qty], M.[Box Qty], L.[SKU Qty]*1./M.[Box Qty] [Avg. SKU per Box]
+FROM M
+LEFT JOIN L
+ON L.Scandate = M.Scandate
+ORDER BY Scandate ASC
